@@ -1,5 +1,4 @@
 import { CreateOrganizationForm } from "@/components/forms/create-organization-form";
-import { Logout } from "@/components/logout";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -9,7 +9,7 @@ export const isAdmin = async () => {
             headers: await headers(),
             body: {
                 permissions: {
-                    project: ["create", "update", "delete"]
+                    organization: ["update", "delete"]
                 }
             }
         });
