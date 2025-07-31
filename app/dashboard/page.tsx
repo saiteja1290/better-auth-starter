@@ -17,8 +17,6 @@ export default async function Dashboard() {
 
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen">
-      <Logout />
-
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline">Create Organization</Button>
