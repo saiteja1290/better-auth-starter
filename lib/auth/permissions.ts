@@ -1,25 +1,35 @@
 import { createAccessControl } from "better-auth/plugins/access";
-import { defaultStatements } from 'better-auth/plugins/organization/access';
 
 const statement = {
-    ...defaultStatements,
-    project: ["create", "share", "update", "delete"],
+    // Organization permissions
+    organization: ["create", "read", "update", "delete", "invite_member", "remove_member"],
+    // Member permissions
+    member: ["read", "invite", "remove"],
+    // Project permissions (you can add more as needed)
+    project: ["create", "read", "update", "delete"],
 } as const;
 
 const ac = createAccessControl(statement);
 
+// Member role - basic permissions
 const member = ac.newRole({
-    project: ["create"],
+    organization: ["read"],
+    member: ["read"],
+    project: ["create", "read"],
 });
 
+// Admin role - can manage organization and members
 const admin = ac.newRole({
-    project: ["create", "update"],
+    organization: ["read", "update", "invite_member", "remove_member"],
+    member: ["read", "invite", "remove"],
+    project: ["create", "read", "update", "delete"],
 });
 
+// Owner role - full permissions
 const owner = ac.newRole({
-    project: ["create", "update", "delete"],
-    organization: ["update", "delete"],
+    organization: ["create", "read", "update", "delete", "invite_member", "remove_member"],
+    member: ["read", "invite", "remove"],
+    project: ["create", "read", "update", "delete"],
 });
 
 export { ac, admin, member, owner, statement };
-

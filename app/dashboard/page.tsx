@@ -1,46 +1,44 @@
-import { CreateOrganizationForm } from "@/components/forms/create-organization-form";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { getOrganizations } from "@/server/organizations";
-import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import UserCard from "@/components/user-card";
+import { OrganizationCard } from "@/components/organization-card";
 
-export default async function Dashboard() {
-  const organizations = await getOrganizations();
+export default async function DashboardPage() {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
-  return (
-    <div className="flex flex-col gap-2 items-center justify-center h-screen">
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline">Create Organization</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Organization</DialogTitle>
-            <DialogDescription>
-              Create a new organization to get started.
-            </DialogDescription>
-          </DialogHeader>
-          <CreateOrganizationForm />
-        </DialogContent>
-      </Dialog>
+    if (!session) {
+        redirect("/login");
+    }
 
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold">Organizations</h2>
-        {organizations.map((organization) => (
-          <Button variant="outline" key={organization.id} asChild>
-            <Link href={`/dashboard/organization/${organization.slug}`}>
-              {organization.name}
-            </Link>
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
+    const [activeSessions, deviceSessions, organization] = await Promise.all([
+        auth.api.listSessions({
+            headers: await headers(),
+        }),
+        auth.api.listDeviceSessions({
+            headers: await headers(),
+        }),
+        auth.api.getFullOrganization({
+            headers: await headers(),
+        }),
+    ]).catch((e) => {
+        console.log(e);
+        return [[], [], null];
+    });
+
+    return (
+        <div className="w-full">
+            <div className="flex gap-4 flex-col">
+                <UserCard
+                    session={JSON.parse(JSON.stringify(session))}
+                    activeSessions={JSON.parse(JSON.stringify(activeSessions))}
+                />
+                <OrganizationCard
+                    activeOrganization={JSON.parse(JSON.stringify(organization))}
+                />
+            </div>
+        </div>
+    );
 }
